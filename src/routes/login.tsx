@@ -8,10 +8,12 @@ import { toast } from "sonner";
 import { MapPin, ArrowLeft, UserCircle2, ShieldCheck, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
-  head: () => ({ meta: [
-    { title: "Mode anonyme — SalubApp" },
-    { name: "description", content: "Signalez en toute confidentialité, sans inscription." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "Mode anonyme — SalubApp" },
+      { name: "description", content: "Signalez en toute confidentialité, sans inscription." },
+    ],
+  }),
   component: LoginPage,
 });
 
@@ -20,13 +22,18 @@ function LoginPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => { if (user) navigate({ to: "/" }); }, [user, navigate]);
+  useEffect(() => {
+    if (user) navigate({ to: "/" });
+  }, [user, navigate]);
 
   const signInAnonymous = async () => {
     setLoading(true);
     const { error } = await supabase.auth.signInAnonymously();
     setLoading(false);
-    if (error) { toast.error("Mode anonyme indisponible", { description: error.message }); return; }
+    if (error) {
+      toast.error("Mode anonyme indisponible", { description: error.message });
+      return;
+    }
     toast.success("Vous êtes en mode anonyme");
     navigate({ to: "/" });
   };
@@ -34,7 +41,10 @@ function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-secondary/40 to-background px-4 py-8">
       <div className="mx-auto max-w-md">
-        <Link to="/" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+        <Link
+          to="/"
+          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
           <ArrowLeft className="h-4 w-4" /> Retour
         </Link>
         <div className="mb-6 flex flex-col items-center text-center">
@@ -69,15 +79,18 @@ function LoginPage() {
           </ul>
 
           <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            <strong>Inscriptions suspendues</strong> — pour préserver la confidentialité,
-            la création de comptes (email, SMS, Google) est temporairement désactivée.
-            Le mode anonyme suffit pour signaler, voter et commenter.
+            <strong>Inscriptions suspendues</strong> — pour préserver la confidentialité, la
+            création de comptes (email, SMS, Google) est temporairement désactivée. Le mode anonyme
+            suffit pour signaler, voter et commenter.
           </div>
         </Card>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           En continuant, vous acceptez notre{" "}
-          <Link to="/confidentialite" className="underline hover:text-foreground">politique de confidentialité</Link>.
+          <Link to="/confidentialite" className="underline hover:text-foreground">
+            politique de confidentialité
+          </Link>
+          .
         </p>
       </div>
     </div>

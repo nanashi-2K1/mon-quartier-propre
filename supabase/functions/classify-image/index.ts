@@ -29,7 +29,8 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Authentification requise" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -40,14 +41,16 @@ serve(async (req) => {
     const { data: userData, error: authErr } = await supa.auth.getUser();
     if (authErr || !userData?.user) {
       return new Response(JSON.stringify({ error: "Session invalide" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const { imageBase64, mimeType } = await req.json();
     if (!imageBase64) {
       return new Response(JSON.stringify({ error: "imageBase64 manquant" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -88,10 +91,24 @@ Réponds UNIQUEMENT en français. Catégories disponibles : ${labelMap}.`,
               parameters: {
                 type: "object",
                 properties: {
-                  is_relevant: { type: "boolean", description: "true si l'image montre un problème d'insalubrité urbaine ou de voirie/chantier à Abidjan, false sinon" },
-                  reason: { type: "string", description: "Si is_relevant=false, courte raison du rejet en français" },
-                  category: { type: "string", enum: CATEGORIES.map((c) => c.value), description: `Une parmi : ${allowedValues}` },
-                  description: { type: "string", description: "Description courte (1-2 phrases) en français du problème observé" },
+                  is_relevant: {
+                    type: "boolean",
+                    description:
+                      "true si l'image montre un problème d'insalubrité urbaine ou de voirie/chantier à Abidjan, false sinon",
+                  },
+                  reason: {
+                    type: "string",
+                    description: "Si is_relevant=false, courte raison du rejet en français",
+                  },
+                  category: {
+                    type: "string",
+                    enum: CATEGORIES.map((c) => c.value),
+                    description: `Une parmi : ${allowedValues}`,
+                  },
+                  description: {
+                    type: "string",
+                    description: "Description courte (1-2 phrases) en français du problème observé",
+                  },
                   confidence: { type: "number", description: "Confiance entre 0 et 1" },
                 },
                 required: ["is_relevant", "category", "description", "confidence"],
@@ -106,19 +123,30 @@ Réponds UNIQUEMENT en français. Catégories disponibles : ${labelMap}.`,
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Trop de requêtes, réessayez dans un instant." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({ error: "Trop de requêtes, réessayez dans un instant." }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Crédits IA épuisés. Ajoutez des crédits dans votre workspace Lovable." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return new Response(
+          JSON.stringify({
+            error: "Crédits IA épuisés. Ajoutez des crédits dans votre workspace Lovable.",
+          }),
+          {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          },
+        );
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "Service IA indisponible" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -126,7 +154,8 @@ Réponds UNIQUEMENT en français. Catégories disponibles : ${labelMap}.`,
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       return new Response(JSON.stringify({ error: "Aucune classification retournée" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const args = JSON.parse(toolCall.function.arguments);
@@ -136,7 +165,8 @@ Réponds UNIQUEMENT en français. Catégories disponibles : ${labelMap}.`,
   } catch (e) {
     console.error("classify-image error:", e);
     return new Response(JSON.stringify({ error: "Service IA indisponible" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });

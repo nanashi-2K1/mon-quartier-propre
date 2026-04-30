@@ -47,7 +47,11 @@ export function ReportsMap({ reports }: { reports: Report[] }) {
           <Marker key={r.id} position={[r.latitude, r.longitude]} icon={photoMarker(src, isReal)}>
             <Popup>
               <div className="w-48 space-y-1">
-                <img src={src} alt={categoryLabel(r.category)} className="h-24 w-full rounded-md object-cover" />
+                <img
+                  src={src}
+                  alt={categoryLabel(r.category)}
+                  className="h-24 w-full rounded-md object-cover"
+                />
                 <div className="font-semibold">{categoryLabel(r.category)}</div>
                 <div className="text-xs">{r.description}</div>
                 <div className="text-[10px] uppercase opacity-70">

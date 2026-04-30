@@ -2,9 +2,9 @@
 // toutes les communes : Abobo, Adjamé, Anyama, Attécoubé, Bingerville,
 // Cocody, Koumassi, Marcory, Plateau, Port-Bouët, Songon, Treichville, Yopougon).
 export const ABIDJAN_BOUNDS = {
-  minLat: 5.20,
+  minLat: 5.2,
   maxLat: 5.55,
-  minLng: -4.20,
+  minLng: -4.2,
   maxLng: -3.78,
 };
 
