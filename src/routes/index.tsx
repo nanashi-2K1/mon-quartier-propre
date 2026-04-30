@@ -7,20 +7,34 @@ import { AppFooter } from "@/components/AppFooter";
 import { ReportCard } from "@/components/ReportCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CATEGORIES, type Category } from "@/lib/categories";
 import type { Database } from "@/integrations/supabase/types";
 import { PlusCircle, Loader2, Megaphone, Flame } from "lucide-react";
 
-const ReportsMap = lazy(() => import("@/components/ReportsMap").then((m) => ({ default: m.ReportsMap })));
+const ReportsMap = lazy(() =>
+  import("@/components/ReportsMap").then((m) => ({ default: m.ReportsMap })),
+);
 
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [
-    { title: "SalubApp — Signalez l'insalubrité dans votre quartier" },
-    { name: "description", content: "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "SalubApp — Signalez l'insalubrité dans votre quartier" },
+      {
+        name: "description",
+        content:
+          "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone.",
+      },
+    ],
+  }),
   component: HomePage,
 });
 
@@ -33,21 +47,35 @@ function HomePage() {
   const load = async () => {
     // Visiteurs anonymes : on lit la vue publique (sans user_id, coordonnées floutées).
     // Utilisateurs connectés : table complète (nécessaire pour vérifier/voter/commenter).
-    const source = user ? "reports" : "reports_public";
-    const { data } = await (supabase as any).from(source).select("*").order("created_at", { ascending: false }).limit(200);
+    const { data } = user
+      ? await supabase
+          .from("reports")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(200)
+      : await supabase
+          .from("reports_public")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(200);
     setReports((data ?? []) as Report[]);
     if (user && data && data.length) {
-      const { data: votes } = await supabase.from("report_votes").select("report_id").eq("user_id", user.id);
+      const { data: votes } = await supabase
+        .from("report_votes")
+        .select("report_id")
+        .eq("user_id", user.id);
       setVotedIds(new Set((votes ?? []).map((v) => v.report_id)));
     } else {
       setVotedIds(new Set());
     }
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [user?.id]);
+  useEffect(() => {
+    load(); /* eslint-disable-next-line */
+  }, [user?.id]);
 
   const filtered = useMemo(
     () => (reports ?? []).filter((r) => filter === "all" || r.category === filter),
-    [reports, filter]
+    [reports, filter],
   );
 
   return (
@@ -61,9 +89,12 @@ function HomePage() {
               <Megaphone className="h-6 w-6" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">Votre quartier, votre voix.</h1>
+              <h1 className="text-2xl font-bold leading-tight sm:text-3xl">
+                Votre quartier, votre voix.
+              </h1>
               <p className="mt-1 text-sm text-primary-foreground/90">
-                Photographiez, géolocalisez, signalez. Les autorités locales reçoivent vos alertes en temps réel.
+                Photographiez, géolocalisez, signalez. Les autorités locales reçoivent vos alertes
+                en temps réel.
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button asChild variant="secondary" size="lg" className="gap-1">
@@ -71,8 +102,15 @@ function HomePage() {
                     <PlusCircle className="h-5 w-5" /> Signaler maintenant
                   </Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="gap-1 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-                  <Link to="/carte"><Flame className="h-5 w-5" /> Voir la carte thermique</Link>
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="gap-1 border-white/40 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+                >
+                  <Link to="/carte">
+                    <Flame className="h-5 w-5" /> Voir la carte thermique
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -82,14 +120,20 @@ function HomePage() {
         {/* Filtre + tabs */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">
-            {reports ? `${filtered.length} signalement${filtered.length > 1 ? "s" : ""}` : "Chargement…"}
+            {reports
+              ? `${filtered.length} signalement${filtered.length > 1 ? "s" : ""}`
+              : "Chargement…"}
           </h2>
           <Select value={filter} onValueChange={(v) => setFilter(v as Category | "all")}>
-            <SelectTrigger className="w-52"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-52">
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Toutes les catégories</SelectItem>
               {CATEGORIES.map((c) => (
-                <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                <SelectItem key={c.value} value={c.value}>
+                  {c.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -110,19 +154,32 @@ function HomePage() {
             {reports && filtered.length === 0 && (
               <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-10 text-center">
                 <p className="text-muted-foreground">Aucun signalement pour le moment.</p>
-                <Button asChild className="mt-4"><Link to={user ? "/signaler" : "/login"}>Soyez le premier à signaler</Link></Button>
+                <Button asChild className="mt-4">
+                  <Link to={user ? "/signaler" : "/login"}>Soyez le premier à signaler</Link>
+                </Button>
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
               {filtered.map((r) => (
-                <ReportCard key={r.id} report={r} hasVoted={votedIds.has(r.id)} onVoteChange={load} />
+                <ReportCard
+                  key={r.id}
+                  report={r}
+                  hasVoted={votedIds.has(r.id)}
+                  onVoteChange={load}
+                />
               ))}
             </div>
           </TabsContent>
 
           <TabsContent value="carte">
             <div className="h-[60vh] overflow-hidden rounded-xl border bg-muted">
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+              <Suspense
+                fallback={
+                  <div className="flex h-full items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  </div>
+                }
+              >
                 {reports && <ReportsMap reports={filtered} />}
               </Suspense>
             </div>

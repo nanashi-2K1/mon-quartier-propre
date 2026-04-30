@@ -15,10 +15,15 @@ const HeatMap = lazy(() => import("@/components/HeatMap").then((m) => ({ default
 type Report = Database["public"]["Tables"]["reports"]["Row"];
 
 export const Route = createFileRoute("/carte")({
-  head: () => ({ meta: [
-    { title: "Carte thermique des nuisances — SalubApp" },
-    { name: "description", content: "Visualisez les zones les plus touchées par l'insalubrité dans votre ville." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "Carte thermique des nuisances — SalubApp" },
+      {
+        name: "description",
+        content: "Visualisez les zones les plus touchées par l'insalubrité dans votre ville.",
+      },
+    ],
+  }),
   component: PublicDashboard,
 });
 
@@ -28,20 +33,29 @@ function PublicDashboard() {
   const [active, setActive] = useState<Set<Category>>(new Set(CATEGORIES.map((c) => c.value)));
 
   useEffect(() => {
-    const source = user ? "reports" : "reports_public";
-    (supabase as any).from(source).select("*").order("created_at", { ascending: false }).limit(1000)
-      .then(({ data }: { data: Report[] | null }) => setReports(data ?? []));
+    const query = user
+      ? supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(1000)
+      : supabase
+          .from("reports_public")
+          .select("*")
+          .order("created_at", { ascending: false })
+          .limit(1000);
+    query.then(({ data }) => setReports((data as Report[] | null) ?? []));
   }, [user?.id]);
 
   const filtered = useMemo(
     () => (reports ?? []).filter((r) => active.has(r.category as Category)),
-    [reports, active]
+    [reports, active],
   );
 
   const byCategory = useMemo(() => {
     const m = new Map<Category, number>();
-    (reports ?? []).forEach((r) => m.set(r.category as Category, (m.get(r.category as Category) ?? 0) + 1));
-    return CATEGORIES.map((c) => ({ ...c, count: m.get(c.value) ?? 0 })).sort((a, b) => b.count - a.count);
+    (reports ?? []).forEach((r) =>
+      m.set(r.category as Category, (m.get(r.category as Category) ?? 0) + 1),
+    );
+    return CATEGORIES.map((c) => ({ ...c, count: m.get(c.value) ?? 0 })).sort(
+      (a, b) => b.count - a.count,
+    );
   }, [reports]);
 
   const topZones = useMemo(() => {
@@ -59,7 +73,11 @@ function PublicDashboard() {
 
   const toggle = (c: Category) => {
     const next = new Set(active);
-    next.has(c) ? next.delete(c) : next.add(c);
+    if (next.has(c)) {
+      next.delete(c);
+    } else {
+      next.add(c);
+    }
     setActive(next);
   };
 
@@ -76,7 +94,8 @@ function PublicDashboard() {
             <div className="flex-1">
               <h1 className="text-2xl font-bold sm:text-3xl">Carte thermique des nuisances</h1>
               <p className="mt-1 text-sm text-white/90">
-                Visualisez en temps réel les zones les plus touchées par l'insalubrité et l'incivisme.
+                Visualisez en temps réel les zones les plus touchées par l'insalubrité et
+                l'incivisme.
               </p>
             </div>
           </div>
@@ -128,7 +147,13 @@ function PublicDashboard() {
                     Aucune donnée à afficher.
                   </div>
                 ) : (
-                  <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader2 className="h-6 w-6 animate-spin" /></div>}>
+                  <Suspense
+                    fallback={
+                      <div className="flex h-full items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      </div>
+                    }
+                  >
                     <HeatMap reports={filtered} />
                   </Suspense>
                 )}
@@ -173,7 +198,10 @@ function PublicDashboard() {
                         <span className="font-mono text-muted-foreground">{c.count}</span>
                       </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+                        <div
+                          className="h-full bg-primary transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
                     </div>
                   );
@@ -193,7 +221,10 @@ function PublicDashboard() {
                   {topZones.map(([ville, n], i) => (
                     <li key={ville} className="flex items-center justify-between gap-2 text-sm">
                       <span className="flex items-center gap-2">
-                        <Badge variant={i === 0 ? "destructive" : "secondary"} className="h-6 w-6 justify-center rounded-full p-0 text-xs">
+                        <Badge
+                          variant={i === 0 ? "destructive" : "secondary"}
+                          className="h-6 w-6 justify-center rounded-full p-0 text-xs"
+                        >
                           {i + 1}
                         </Badge>
                         <span className="truncate">{ville}</span>

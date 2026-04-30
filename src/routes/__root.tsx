@@ -35,14 +35,26 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "SalubApp — Signalez l'insalubrité dans votre quartier" },
-      { name: "description", content: "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone." },
+      {
+        name: "description",
+        content:
+          "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone.",
+      },
       { name: "author", content: "SalubApp" },
       { property: "og:title", content: "SalubApp — Signalez l'insalubrité dans votre quartier" },
-      { property: "og:description", content: "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone." },
+      {
+        property: "og:description",
+        content:
+          "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "SalubApp — Signalez l'insalubrité dans votre quartier" },
-      { name: "twitter:description", content: "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone." },
+      {
+        name: "twitter:description",
+        content:
+          "Plateforme citoyenne pour signaler les problèmes d'insalubrité et d'incivisme en Afrique francophone.",
+      },
       { property: "og:image", content: "/mqp.png" },
       { name: "twitter:image", content: "/mqp.png" },
     ],
@@ -71,9 +83,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const [qc] = useState(() => new QueryClient({
-    defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
-  }));
+  const [qc] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } },
+      }),
+  );
   return (
     <QueryClientProvider client={qc}>
       <AuthProvider>

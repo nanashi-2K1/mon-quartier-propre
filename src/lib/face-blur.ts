@@ -8,7 +8,7 @@ async function getDetector(): Promise<FaceDetector> {
   if (!detectorPromise) {
     detectorPromise = (async () => {
       const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm"
+        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35/wasm",
       );
       return FaceDetector.createFromOptions(vision, {
         baseOptions: {
@@ -71,7 +71,7 @@ export async function blurFacesInImage(file: File): Promise<BlurResult> {
   }
 
   const blob: Blob = await new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/jpeg", 0.85)
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/jpeg", 0.85),
   );
   bitmap.close();
   return { blob, facesDetected, width: canvas.width, height: canvas.height };

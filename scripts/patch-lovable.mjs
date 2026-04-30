@@ -20,7 +20,11 @@ const patches = [
 
 for (const { file, find, replace } of patches) {
   let src;
-  try { src = readFileSync(file, "utf8"); } catch { continue; }
+  try {
+    src = readFileSync(file, "utf8");
+  } catch {
+    continue;
+  }
   if (src.includes(find)) {
     writeFileSync(file, src.replace(find, replace), "utf8");
     console.log(`patch-lovable: patched ${file.split("/").pop()}`);
